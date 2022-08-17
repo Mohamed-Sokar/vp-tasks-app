@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { TasksContext } from "../context/tasks-context";
@@ -5,14 +6,14 @@ import FirstImage from "../Resources/img/1.png";
 
 export const TaskDetailsPage = () => {
   let params = useParams();
-  let taskContext = useContext(TasksContext);
+  let tasksContext = useContext(TasksContext);
 
   // let taskDetails = {}
   let [taskDetails, setTaskDetails] = useState({});
 
   const fetchTaskDetails = () => {
-    let filteredTasks = taskContext.tasks.find(
-      (element) => element.id == params.id
+    let filteredTasks = tasksContext.tasks.find(
+      (element) => element.id === params.id
     );
     setTaskDetails(filteredTasks);
     console.log(taskDetails);
@@ -21,10 +22,21 @@ export const TaskDetailsPage = () => {
   useEffect(fetchTaskDetails, []);
 
   const statusChangeHandler = (status) => {
-    setTaskDetails((prevTask) => {
-      prevTask.status = status;
-      return { ...prevTask };
-    });
+    const token = tasksContext.token;
+    axios
+      .patch(
+        `https://react-tasks-af7a0-default-rtdb.firebaseio.com/tasks/${taskDetails.id}.json?auth=${token}`,
+        {
+          status: status,
+        }
+      )
+      .then((response) => {
+        setTaskDetails((prevTask) => {
+          prevTask.status = status;
+          return { ...prevTask };
+        });
+      })
+      .catch((error) => {});
   };
 
   return (

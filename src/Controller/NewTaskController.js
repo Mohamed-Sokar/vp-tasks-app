@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useContext, useRef } from "react";
 import Swal from "sweetalert2";
 import { TasksContext } from "../context/tasks-context";
@@ -12,7 +13,7 @@ export class NewTaskController {
   startDateRef = useRef();
   endDateRef = useRef();
 
-  context = useContext(TasksContext);
+  tasksContext = useContext(TasksContext);
 
   onFormSubmitHandler = (e) => {
     e.preventDefault();
@@ -34,9 +35,20 @@ export class NewTaskController {
   addNewTask = () => {
     if (this.checkForm()) {
       const newTaskObject = this.newTask;
-      this.context.addNewTask(newTaskObject);
-      this.clearInputs();
-      this.showAlert("Success", "Task added successfully", "success");
+      const token = this.tasksContext.token;
+      axios
+        .post(
+          `https://react-tasks-af7a0-default-rtdb.firebaseio.com/tasks.json?auth=${token}`,
+          newTaskObject
+        )
+        .then((Response) => {
+          this.tasksContext.addNewTask(newTaskObject);
+          this.clearInputs();
+          this.showAlert("Success", "Task added successfully", "success");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   };
 

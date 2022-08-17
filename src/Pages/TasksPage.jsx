@@ -1,24 +1,52 @@
-import React, { useContext, useState } from "react";
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
 import { TaskDetails } from "../Components/Tasks/TaskDetails";
 import { TasksContext } from "../context/tasks-context";
 import FirstImage from "../Resources/img/1.png";
 
 export const TasksPage = () => {
   let tasksContext = useContext(TasksContext);
-  let [filteredTasks, setFilteredTasks] = useState(tasksContext.tasks);
+  let [filteredTasks, setFilteredTasks] = useState([]);
+
+  const fetchTasks = () => {
+    if (tasksContext.tasks.length == 0) {
+      // alert("Fetch");
+      const token = tasksContext.token;
+      axios
+        .get(
+          `https://react-tasks-af7a0-default-rtdb.firebaseio.com/tasks.json?auth=${token}`
+        )
+        .then((response) => {
+          let tasks = [];
+          for (let key in response.data) {
+            let task = response.data[key];
+            task.id = key;
+            tasks.push(task);
+          }
+          tasksContext.setTasks(tasks);
+          // setFilteredTasks(tasksContext.tasks);
+          setFilteredTasks(tasks);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      // alert("Read from Context");
+      setFilteredTasks(tasksContext.tasks);
+    }
+  };
+
+  useEffect(fetchTasks, []);
 
   let filterTasks = (event) => {
-    console.log(event.target.value);
     if (event.target.value == -1) {
       setFilteredTasks(tasksContext.tasks);
-      console.log(event.target.value);
     } else {
       let newFilteredTasks = tasksContext.tasks.filter(
         (element) => element.status == event.target.value
       );
       setFilteredTasks(newFilteredTasks);
     }
-    // alert(event.target.value);
   };
   return (
     <>
@@ -47,7 +75,6 @@ export const TasksPage = () => {
               )}
             </li>
             <li className="list-inline-item mt-3">
-              {" "}
               {/* <select
                 className=" dropdown form-control pull-right"
                 placeholder="Filter By status"

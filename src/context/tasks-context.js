@@ -2,10 +2,11 @@ import React, { useState } from "react";
 
 export const TasksContext = React.createContext({
   tasks: [],
-  setTasks: null,
+  setTasks: (tasks) => {},
   addNewTask: (newTask) => {},
   isLoggedIn: false,
   setLoggedIn: (status) => {},
+  token: null,
 });
 
 export const TasksContextProvider = (props) => {
@@ -27,6 +28,7 @@ export const TasksContextProvider = (props) => {
         addNewTask: addNewTaskHandler,
         isLoggedIn: isLoggedIn,
         setLoggedIn: setLoggedIn,
+        token: localStorage.getItem("token"),
       }}
     >
       {props.children}
